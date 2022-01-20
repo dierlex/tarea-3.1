@@ -1,0 +1,47 @@
+char* const argv2[] = {"cat", "/etc/hosts", NULL};
+  char* const argv[] = {"sort", NULL};
+
+ /* string cat = "cat";
+  string etc = "etc";
+  string hosts = "hosts";
+  string sort = "sort";
+
+  args [0] = (char*)cat.c_str();
+  args [1] = (char*)etc.c_str();
+  args [2] = (char*)hosts.c_str();
+  args [3] = (char*)sort.c_str();
+  args [4] = NULL;*/
+
+  if (pipe(fd) == -1) {
+        perror("Creando pipe");
+        exit(EXIT_FAILURE);
+  }
+
+  switch(pid = fork()) {
+
+  case 0:
+        // The child process will execute wc.
+        // Close the pipe write descriptor.
+        close(fd[WRITE]);
+        // Redirect STDIN to read from the pipe.
+        dup2(fd[READ], STDIN_FILENO);
+        // Execute sort
+        execvp(argv[0],argv);
+
+
+
+  case -1:
+        perror("fork() failed)");
+        exit(EXIT_FAILURE);
+
+  default:
+        // The parent process will execute ls.
+        // Close the pipe read descriptor.
+        close(fd[READ]);
+        // Redirect STDOUT to write to the pipe.
+        dup2(fd[WRITE], STDOUT_FILENO);
+        // Execute cat /etc/hosts
+        execvp(argv2[0],argv2);
+
+  }
+}
