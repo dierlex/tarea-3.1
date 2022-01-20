@@ -1,0 +1,61 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <time.h>
+
+
+int main (void)
+{
+	int fd[2];
+	pid_t pidC;
+	char buf[4]; //Tamaño para el vector de caracteres
+
+	srand(time(NULL));
+	int num = rand() % 1001; //Número Random
+
+	int num2; //Aquí el hijo meterá de nuevo el numero recibido
+
+
+	pipe(fd);
+	pidC = fork();
+
+	switch (pidC)
+	{
+		case 0: //HIJO, LEE EL MENESAJE
+			close(fd[1]);
+			read(fd[0], buf, sizeof(buf));
+//			printf("El Mensaje recibido es: %d", num2);
+
+			num2 = atoi(buf); //Convertimos lo recibido de char a entero
+			printf("El Numero recibido es: %d\n", num2);
+
+			if(num2 >= 500)
+			{
+				printf("%d es mayor que 500\n", num2);
+			}
+			else if(num2 < 500)
+			{
+				printf("%d es menor que 500\n", num2);
+			}
+
+			close(fd[0]);
+			break;
+
+		case -1:
+			break;
+
+		default: //PADRE, ENVIA MENSAJE
+			close(fd[0]);
+
+			sprintf(buf, "%d", num); //sprintf(aquiseguardaenchar, %d, elnumerorandom)
+
+			write(fd[1], buf, 4);
+                        close(fd[1]);
+                        exit(0);
+                        break;
+
+	}
+
+	return 0;
+
+}
